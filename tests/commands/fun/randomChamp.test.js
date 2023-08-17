@@ -3,29 +3,32 @@ const fetch = require('node-fetch');
 jest.mock('node-fetch');
 
 describe('Random Champ tests', function () {
-  it('Should return an array of champs names', async function () {
+  it('Should return an array of champs', async function () {
 
     fetch.mockResolvedValue({
-      json: jest.fn().mockResolvedValue({ data: { NotAChamp: { name: 'NotAChamp' } } })
+      json: jest.fn().mockResolvedValue({ data: { NotAChamp: { name: 'NotAChamp', tags: ['Mage', 'Support'] } } })
     });
 
     const champs = await test.getLatestChamps();
 
-    expect(champs).toEqual(['NotAChamp']);
+    expect(champs).toEqual([{ name: 'NotAChamp', typeOfChamp: ['Mage', 'Support'] }]);
   })
 
-  it('Should return a random champs from the set', async function () {
+  it('Should return a mage champs from the set', async function () {
 
-    fetch.mockResolvedValue({
-      json: jest.fn().mockResolvedValue({
-        data: {
-          NotAChamp: { name: 'NotAChamp' }, NotAChamp2: { name: 'NotAChamp2' }, NotAChamp3: { name: 'NotAChamp3' }
-        }
-      })
-    });
+    const champs = [{ name: 'NotAChamp', typeOfChamp: ['Mage'] }, { name: 'NotAChamp2', typeOfChamp: ['Support'] }, { name: 'NotAChamp3', typeOfChamp: ['Assasin'] }]
 
-    const champ = await test.randomizeChamp();
+    const champ = await test.randomizeChamp(champs, 'Mage');
 
-    expect(['NotAChamp', 'NotAChamp2', 'NotAChamp3']).toContain(champ);
+    expect(champ).toEqual({ name: 'NotAChamp', typeOfChamp: ['Mage'] });
+  })
+
+  it('Should return an assasin champs from the set', async function () {
+
+    const champs = [{ name: 'NotAChamp', typeOfChamp: ['Mage'] }, { name: 'NotAChamp2', typeOfChamp: ['Support'] }, { name: 'NotAChamp3', typeOfChamp: ['Assasin'] }]
+
+    const champ = await test.randomizeChamp(champs, 'Assasin');
+
+    expect(champ).toEqual({ name: 'NotAChamp3', typeOfChamp: ['Assasin'] });
   })
 })
